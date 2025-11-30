@@ -3,12 +3,12 @@
 This guide shows how to turn the trained EfficientNet-B4 checkpoint into a FastAPI inference service.
 
 ## 1. Prepare artifacts
-1. `BEST_MODEL.pth` và `FINAL_REPORT.json` đã có trong thư mục gốc dự án.
-2. Nếu cần tái tạo hoặc cập nhật nhãn, chạy script sau để sinh `class_names.json` từ `FINAL_REPORT.json` sẵn có:
+1. Ensure `BEST_MODEL.pth` and `FINAL_REPORT.json` are in the project root.
+2. To regenerate or update labels, run the script below to produce `class_names.json` from the existing `FINAL_REPORT.json`:
   ```powershell
   python scripts/export_class_names.py --report "c:/Users/PC/Desktop/EfficientNetPython/FINAL_REPORT.json"
   ```
-  (Trường hợp bạn có dataset mới, thay bằng `--dataset "D:/path/to/Dataset"`.)
+  (If you have a new dataset, replace the flag with `--dataset "D:/path/to/Dataset"`.)
 
 ## 2. Create and activate a virtual environment
 ```powershell
@@ -39,3 +39,8 @@ curl -X POST "http://localhost:8000/predict" ^
 ```
 
 The response provides the top-k classes with probabilities and the measured inference time.
+
+## 6. Explore Swagger UI / ReDoc
+- Navigate to `http://localhost:8000/docs` for Swagger UI (interactive calls, quick test uploads, schema inspection).
+- Visit `http://localhost:8000/redoc` for a static documentation view.
+- Open `README_API.md` anytime for the full offline walkthrough.
