@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Optional, Dict, Any
 import json
 import time
 
@@ -10,9 +10,12 @@ from PIL import Image
 from timm import create_model
 from torchvision import transforms
 
+from app.plant_detector import PlantDetector
+
 
 class DiseasePredictor:
-    """Wrap EfficientNet-B4 checkpoint loading and inference."""
+    """Wrap EfficientNet-B4 checkpoint loading and inference with optional YOLOv8 plant detection."""
+
 
     def __init__(
         self,
@@ -21,7 +24,11 @@ class DiseasePredictor:
         input_size: int = 380,
         device: str | None = None,
         top_k: int = 5,
+        yolo_model_path: Path | str = Path("best.pt"),
+        yolo_confidence: float = 0.3,
+        enable_plant_detection: bool = True,
     ) -> None:
+
         self.model_path = Path(model_path)
         self.class_names_path = Path(class_names_path)
         self.input_size = input_size
@@ -39,6 +46,18 @@ class DiseasePredictor:
         self.top_k = min(self.top_k, len(self.class_names))
         self.model = self._load_model()
         self.model.eval()
+
+        # Initialize plant detector if enabled
+        self.plant_detector: Optional[PlantDetector] = None
+        if enable_plant_detection:
+            try:
+                self.plant_detector = PlantDetector(
+                    model_path=yolo_model_path,
+                    confidence_threshold=yolo_confidence,
+                    device=str(self.device),
+                )
+            except FileNotFoundError:
+                print(f"[DiseasePredictor] Warning: YOLOv8 model not found at {yolo_model_path}. Plant detection disabled.")
 
     def _load_class_names(self) -> List[str]:
         if not self.class_names_path.exists():
@@ -95,3 +114,55 @@ class DiseasePredictor:
         top_probs, top_idxs = probs.topk(self.top_k)
         labels = [self.class_names[idx] for idx in top_idxs.tolist()]
         return labels, top_probs.tolist(), elapsed_ms
+
+    @torch.inference_mode()
+    def predict_with_detection(
+        self, image: Image.Image
+    ) -> Dict[str, Any]:
+        """
+        Two-stage prediction: detect plant first, then classify disease.
+
+        Args:
+            image: PIL Image to analyze
+
+        Returns:
+            Dictionary containing:
+            - plant_detected: bool
+            - plant_confidence: float
+            - plant_bbox: [x, y, width, height] or None
+            - detection_time_ms: float
+            - top_predictions: List[Dict] with label and probability (empty if no plant)
+            - classification_time_ms: float (0 if no plant detected)
+
+        Raises:
+            RuntimeError: If plant detection is not enabled
+            ValueError: If no plant is detected in the image
+        """
+        if self.plant_detector is None:
+            raise RuntimeError("Plant detection is not enabled. Initialize with enable_plant_detection=True.")
+
+        # Stage 1: Detect plant
+        has_plant, confidence, bbox, cropped_image, detection_time = self.plant_detector.detect(image)
+
+        result = {
+            "plant_detected": has_plant,
+            "plant_confidence": confidence,
+            "plant_bbox": bbox,
+            "detection_time_ms": detection_time,
+            "top_predictions": [],
+            "classification_time_ms": 0.0,
+        }
+
+        if not has_plant:
+            raise ValueError("No plant detected in the image")
+
+        # Stage 2: Classify disease on cropped plant image
+        labels, probabilities, classification_time = self.predict(cropped_image)
+        
+        result["top_predictions"] = [
+            {"label": label, "probability": prob}
+            for label, prob in zip(labels, probabilities)
+        ]
+        result["classification_time_ms"] = classification_time
+
+        return result

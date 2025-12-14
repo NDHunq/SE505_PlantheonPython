@@ -1,0 +1,72 @@
+{
+  "statistics": {
+    "total_samples": 9431,
+    "correct_predictions": 9415,
+    "wrong_predictions": 16,
+    "avg_confidence_all": 0.9981933334383526,
+    "avg_confidence_correct": 0.9984803862493847,
+    "avg_confidence_wrong": 0.8292806949466467
+  },
+  "threshold_analysis": [
+    {
+      "threshold": 0.5,
+      "accept_rate": 0.9997879334110911,
+      "accuracy": 0.9984091632198536,
+      "reject_rate": 0.00021206658890893237
+    },
+    {
+      "threshold": 0.55,
+      "accept_rate": 0.9992577669388187,
+      "accuracy": 0.9984083191850595,
+      "reject_rate": 0.0007422330611812633
+    },
+    {
+      "threshold": 0.6000000000000001,
+      "accept_rate": 0.9987276004665465,
+      "accuracy": 0.9988321477863892,
+      "reject_rate": 0.0012723995334534832
+    },
+    {
+      "threshold": 0.6500000000000001,
+      "accept_rate": 0.998621567172092,
+      "accuracy": 0.998832023784243,
+      "reject_rate": 0.0013784328279079494
+    },
+    {
+      "threshold": 0.7000000000000002,
+      "accept_rate": 0.9983034672887287,
+      "accuracy": 0.9988316516197557,
+      "reject_rate": 0.001696532711271348
+    },
+    {
+      "threshold": 0.7500000000000002,
+      "accept_rate": 0.9977733008164563,
+      "accuracy": 0.9988310308182784,
+      "reject_rate": 0.002226699183543679
+    },
+    {
+      "threshold": 0.8000000000000003,
+      "accept_rate": 0.9975612342275475,
+      "accuracy": 0.9988307823129252,
+      "reject_rate": 0.0024387657724525003
+    },
+    {
+      "threshold": 0.8500000000000003,
+      "accept_rate": 0.9966069345774573,
+      "accuracy": 0.9989360570273433,
+      "reject_rate": 0.003393065422542696
+    },
+    {
+      "threshold": 0.9000000000000004,
+      "accept_rate": 0.9955466016329128,
+      "accuracy": 0.9990414314623496,
+      "reject_rate": 0.004453398367087247
+    },
+    {
+      "threshold": 0.9500000000000004,
+      "accept_rate": 0.9922595695048245,
+      "accuracy": 0.9992519769181449,
+      "reject_rate": 0.0077404304951754765
+    }
+  ]
+}
